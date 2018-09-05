@@ -1,3 +1,8 @@
+![npm](https://img.shields.io/npm/v/rivue.svg?style=flat-square)
+![npm dependencies](https://img.shields.io/badge/dependencies-0-green.svg?style=flat-square)
+![npm bundle size (minified)](https://img.shields.io/bundlephobia/min/rivue.svg?style=flat-square)
+[![GitHub license](https://img.shields.io/github/license/strutcode/rivue.svg?style=flat-square)](https://github.com/strutcode/rivue/blob/master/LICENSE)
+
 # Rivue
 A clean, no frills Flux alternative for Vue.js 2.x.
 
