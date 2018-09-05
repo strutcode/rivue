@@ -1,10 +1,11 @@
 {
-  "name": "vuex-alt",
-  "version": "1.0.0",
+  "name": "rivue",
+  "version": "0.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "lib/rivue.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "webpack -p",
+    "test": "mocha"
   },
   "author": "Tristan Shelton",
   "license": "MIT",
@@ -23,7 +24,7 @@
     "webpack": "^4.17.1",
     "webpack-cli": "^3.1.0"
   },
-  "dependencies": {
-    "vue": "^2.5.17"
+  "peerDependencies": {
+    "vue": "^2.5"
   }
 }

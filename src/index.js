@@ -3,30 +3,44 @@ import Vue from 'vue'
 export class Store {
   constructor(stores) {
     Object.entries(stores).forEach(([name, Constructor]) => {
+      const storeName = name.toLowerCase()
       const data = {}
       const computed = {}
       const methods = {}
 
-      const instance = new Constructor()
-      const props = Object.getOwnPropertyDescriptors(instance)
-      const funcs = Object.getOwnPropertyDescriptors(Constructor.prototype)
+      let instance, props
+
+      if (typeof Constructor === 'function') {
+        instance = new Constructor()
+        props = Object.assign(
+          {},
+          Object.getOwnPropertyDescriptors(Constructor.prototype),
+          Object.getOwnPropertyDescriptors(instance),
+        )
+      }
+      else if (typeof Constructor === 'object') {
+        instance = Constructor
+        props = Object.getOwnPropertyDescriptors(instance)
+      }
+      else {
+        throw new Error(`Provided store '${name}' is not a class or object`)
+      }
 
       Object.entries(props).forEach(([name, descriptor]) => {
-        data[name] = descriptor.value
-      })
-
-      Object.entries(funcs).forEach(([name, descriptor]) => {
-        if (name === 'constructor') return
-
         if (descriptor.get) {
           computed[name] = descriptor.get
         }
-        else {
+        else if (typeof descriptor.value === 'function') {
+          if (name === 'constructor') return
           methods[name] = descriptor.value
+        }
+        else {
+          data[name] = descriptor.value
         }
       })
 
-      this[name.toLowerCase()] = new Vue({ data, computed, methods })
+      this[storeName] = new Vue({ data, computed, methods })
+      this[storeName].$store = this
     })
   }
 }
@@ -50,16 +64,25 @@ function lookupDescriptor(root, desc) {
 }
 
 function resolveParam(store, param) {
-  if (typeof param !== 'object') return // TODO: Warn?
-
   if (Array.isArray(param)) {
     return param.map(lookupDescriptor.bind(null, store))
+  }
+  if (typeof param === 'object') {
+    const flatLookup = (acc, [key, value]) => {
+      const resolved = resolveParam(store[key], value)
+      return acc.concat(resolved)
+    }
+
+    return Object.entries(param).reduce(flatLookup, [])
+  }
+  if (typeof param === 'string') {
+    return [lookupDescriptor(store, param)]
   }
 
   return []
 }
 
-export default {
+const Rivue = {
   Store,
   install(Vue, options) {
     Vue.mixin({
@@ -98,12 +121,12 @@ export default {
         }
 
         if (!options.store) {
-          console.warn(new Error('VuexAlt in use but no store provided'))
+          console.warn(new Error('Rivue in use but no store provided'))
           return
         }
 
         if (!(options.store instanceof Store)) {
-          throw new Error('provided store is not a vuexalt store')
+          throw new Error('provided store is not a Rivue store')
         }
 
         // Init
@@ -134,5 +157,9 @@ export default {
         }
       }
     })
-  }
+  },
 }
+
+if (global.Vue) global.Vue.use(Rivue)
+
+export default Rivue

@@ -6,7 +6,17 @@ module.exports = {
   target: 'node',
   output: {
     path: path.resolve(__dirname, 'lib'),
-    filename: 'vuex-alt.js',
+    filename: 'rivue.js',
+    library: 'rivue',
+    libraryTarget: 'umd'
   },
-  externals: ['vue'],
+  externals: {
+    vue: {
+      commonjs: 'vue',
+      commonjs2: 'vue',
+      amd: 'vue',
+      root: 'Vue'
+    },
+  },
+  devtool: 'source-map',
 }
