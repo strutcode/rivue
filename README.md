@@ -1,6 +1,9 @@
 # Rivue
 A clean, no frills Flux alternative for Vue.js 2.x.
 
+## WARNING
+Rivue is experimental software and is not finished. It is under active development and interfaces/functionality may change. Do not use in production environments.
+
 ## Why Rivue
 Frustrated by all of the boilerplate and inconvenience of traditional state management? Me too!
 

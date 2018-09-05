@@ -1,7 +1,11 @@
 {
   "name": "rivue",
-  "version": "0.1.0",
-  "description": "",
+  "version": "0.1.0-alpha",
+  "description": "A clean, no frills Flux alternative for Vue.js 2.x.",
+  "repository": "github:strutcode/rivue",
+  "homepage": "https://github.com/strutcode/rivue#readme",
+  "keywords": ["vue", "vuex", "redux", "flux", "state management"],
+  "files": ["/lib"],
   "main": "lib/rivue.js",
   "scripts": {
     "build": "webpack -p",
@@ -25,6 +29,6 @@
     "webpack-cli": "^3.1.0"
   },
   "peerDependencies": {
-    "vue": "^2.5"
+    "vue": "^2"
   }
 }
