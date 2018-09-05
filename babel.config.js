@@ -7,6 +7,10 @@ module.exports = {
           node: true,
         },
       }
-    ]
+    ],
+  ],
+  plugins: [
+    '@babel/proposal-class-properties',
+    ['module-resolver', { root: './src' }],
   ],
 }
