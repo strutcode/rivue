@@ -1,14 +1,12 @@
 const path = require('path')
 
-module.exports = {
+const base = {
   mode: process.env.NODE_ENV || 'development',
   entry: './src/index.js',
-  target: 'node',
   output: {
     path: path.resolve(__dirname, 'lib'),
-    filename: 'rivue.js',
-    library: 'rivue',
-    libraryTarget: 'umd'
+    library: 'Rivue',
+    libraryTarget: 'umd',
   },
   externals: {
     vue: {
@@ -20,3 +18,23 @@ module.exports = {
   },
   devtool: 'source-map',
 }
+
+const dev = {
+  ...base,
+  mode: 'development',
+  output: {
+    ...base.output,
+    filename: 'rivue.js',
+  }
+}
+
+const prod = {
+  ...base,
+  mode: 'production',
+  output: {
+    ...base.output,
+    filename: 'rivue.min.js',
+  }
+}
+
+module.exports = [dev, prod]

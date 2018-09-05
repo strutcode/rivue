@@ -89,48 +89,40 @@ const Rivue = {
       beforeCreate() {
         const options = this.$options
 
-        // Normal instance
-        if (options.parent) {
-          if (!options.parent.$store) return
-
-          const init = name => typeof options[name] === 'function' ? options[name]() : options[name] || {}
-
-          const store = this.$store = options.parent.$store
-          options.data = init('data')
-          options.computed = init('computed')
-          options.methods = init('methods')
-
-          if (options.state) {
-            const map = resolveParam(store, options.state)
-
-            // TODO: verification
-
-            map.forEach(({ parent, name }) => {
-              options.computed[name] = {
-                get: function() {
-                  return parent[name]
-                },
-                set: function(val) {
-                  parent[name] = val
-                }
-              }
-            })
+        if (!options.parent && options.store) {
+          if (!(options.store instanceof Store)) {
+            throw new Error('provided store is not a Rivue store')
           }
 
-          return
+          this.$store = options.store
         }
 
-        if (!options.store) {
-          console.warn(new Error('Rivue in use but no store provided'))
-          return
-        }
-
-        if (!(options.store instanceof Store)) {
-          throw new Error('provided store is not a Rivue store')
-        }
+        if (options.parent && options.parent.$store) this.$store = options.parent.$store
 
         // Init
-        this.$store = options.store
+        const store = this.$store
+        const init = name => typeof options[name] === 'function' ? options[name]() : options[name] || {}
+
+        options.data = init('data')
+        options.computed = init('computed')
+        options.methods = init('methods')
+
+        if (options.state) {
+          const map = resolveParam(store, options.state)
+
+          // TODO: verification
+
+          map.forEach(({ parent, name }) => {
+            options.computed[name] = {
+              get: function() {
+                return parent[name]
+              },
+              set: function(val) {
+                parent[name] = val
+              }
+            }
+          })
+        }
       },
       created() {
         const options = this.$options
@@ -160,6 +152,6 @@ const Rivue = {
   },
 }
 
-if (global.Vue) global.Vue.use(Rivue)
+if (window && window.Vue) window.Vue.use(Rivue)
 
 export default Rivue

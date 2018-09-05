@@ -2,7 +2,9 @@
 A clean, no frills Flux alternative for Vue.js 2.x.
 
 ## WARNING
-Rivue is experimental software and is not finished. It is under active development and interfaces/functionality may change. Do not use in production environments.
+Rivue is experimental software and is not finished. It is under active development and interfaces/functionality may change.
+
+Please feel free to provide feedback and suggestions via [Github](https://github.com/strutcode/rivue/issues).
 
 ## Why Rivue
 Frustrated by all of the boilerplate and inconvenience of traditional state management? Me too!
@@ -34,6 +36,9 @@ class Todos {
 What if you could do that while keeping all of the book keeping and time traveling features of Flux-like state managers? Plus integrate with Vue for reactive component rendering?
 
 Enter Rivue!
+
+## Try it Out
+Check out the [Sandbox on CodePen](https://codepen.io/strutcode/pen/mGMMEP?editors=1010) to get your feet wet right away.
 
 ## Installation
 
