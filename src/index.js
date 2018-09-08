@@ -1,46 +1,42 @@
-import Vue from 'vue'
+import Vue, { util } from 'vue'
 
 export class Store {
   constructor(stores) {
     Object.entries(stores).forEach(([name, Constructor]) => {
       const storeName = name.toLowerCase()
-      const data = {}
-      const computed = {}
-      const methods = {}
 
       let instance, props
 
       if (typeof Constructor === 'function') {
         instance = new Constructor()
-        props = Object.assign(
-          {},
-          Object.getOwnPropertyDescriptors(Constructor.prototype),
-          Object.getOwnPropertyDescriptors(instance),
-        )
+        props = [
+          ...Object.getOwnPropertyNames(Constructor.prototype),
+          ...Object.getOwnPropertyNames(instance),
+        ]
       }
       else if (typeof Constructor === 'object') {
         instance = Constructor
-        props = Object.getOwnPropertyDescriptors(instance)
+        props = Object.getOwnPropertyNames(instance)
       }
       else {
         throw new Error(`Provided store '${name}' is not a class or object`)
       }
 
-      Object.entries(props).forEach(([name, descriptor]) => {
-        if (descriptor.get) {
-          computed[name] = descriptor.get
+      props.forEach(key => {
+        if (typeof instance[key] === 'function') {
+          util.defineReactive(instance, key, instance[key].bind(instance))
         }
-        else if (typeof descriptor.value === 'function') {
-          if (name === 'constructor') return
-          methods[name] = descriptor.value
-        }
-        else {
-          data[name] = descriptor.value
-        }
+
+        util.defineReactive(instance, key)
       })
 
-      this[storeName] = new Vue({ data, computed, methods })
-      this[storeName].$store = this
+      Object.defineProperty(instance, '$store', {
+        value: this,
+        configurable: false,
+        enumerable: false,
+      })
+
+      this[storeName] = instance
     })
   }
 }
@@ -152,6 +148,6 @@ const Rivue = {
   },
 }
 
-if (window && window.Vue) window.Vue.use(Rivue)
+if (global.Vue) global.Vue.use(Rivue)
 
 export default Rivue
