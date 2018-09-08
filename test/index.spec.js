@@ -10,67 +10,130 @@ describe('Rivue', () => {
     expect(install).not.to.throw()
   })
 
-  describe('protects against common misuse', () => {
-    before(() => {
-      stub(console, 'warn')
-    })
+  describe('Store', () => {
+    let classStore, objectStore
 
-    after(() => {
-      console.warn.restore()
-    })
+    // Fixtures
+    class Things {
+      // State
+      list = []
+      number = 42
+      string = 'test'
+      object = { foo: 'bar' }
 
-    it('warns when not using a store', () => {
-      const Vue = createLocalVue()
-      Vue.use(Rivue)
-
-      new Vue({ data: { foo: 'bar' } })
-
-      expect(console.warn).to.have.been.calledWithMatch(Error)
-    })
-  })
-
-  describe('class interface', () => {
-    let Vue
-    let store
-    let root
-
-    beforeEach(() => {
-      Vue = createLocalVue()
-      Vue.use(Rivue)
-
-      class Things {
-        // State
-        list = []
-        number = 42
-        string = 'test'
-        object = { foo: 'bar' }
-
-        // Getters/Setters
-        get numberPlusFive() {
-          return this.number + 5
-        }
-
-        // Actions
-        listAction() {
-          this.list.push({ abc: 123 })
-          this.number = 5
-          return this
-        }
+      // Getters/Setters
+      get numberPlusFive() {
+        return this.number + 5
       }
 
-      store = new Store({
-        Things,
+      // Actions
+      listAction() {
+        this.list.push({ abc: 123 })
+        this.number = 5
+        return this
+      }
+    }
+
+    function OldThings() {
+      // State
+      this.list = []
+      this.number = 42
+      this.string = 'test'
+      this.object = {}
+      this.object.foo = 'bar'
+
+      // Getters/Setters
+      Object.defineProperty(this, 'numberPlusFive', {
+        get: function() {
+          return this.number + 5
+        },
       })
 
-      root = new Vue({ store })
+      // Actions
+      var self = this
+      this.listAction = function() {
+        self.list.push({ abc: 123 })
+        self.number = 5
+        return self
+      }
+    }
+
+    beforeEach(() => {
+      classStore = new Store({
+        Things,
+        OldThings,
+      })
+
+      objectStore = new Store({
+        things: {
+          list: [],
+          number: 42,
+          string: 'test',
+          object: { foo: 'bar' },
+          get numberPlusFive() {
+            return this.number + 5
+          },
+          listAction() {
+            this.list.push({ abc: 123 })
+            this.number = 5
+            return this
+          },
+        }
+      })
     })
 
-    it('store provides reactive state', () => {
-      expect(store.things).to.have.observable('list')
-      expect(store.things).to.have.observable('number')
-      expect(store.things).to.have.observable('string')
-      expect(store.things).to.have.observable('object')
-      expect(store.things.object).to.have.observable('foo')
+    it('accepts a class', () => {
+      expect(classStore.things).to.have.observable('list')
+      expect(classStore.things).to.have.observable('number')
+      expect(classStore.things).to.have.observable('string')
+      expect(classStore.things).to.have.observable('object')
+      expect(classStore.things.object).to.have.observable('foo')
+      expect(classStore.things).to.have.observable('numberPlusFive')
+    })
+
+    it('accepts an ES5 class', () => {
+      expect(classStore.oldthings).to.have.observable('list')
+      expect(classStore.oldthings).to.have.observable('number')
+      expect(classStore.oldthings).to.have.observable('string')
+      expect(classStore.oldthings).to.have.observable('object')
+      expect(classStore.oldthings.object).to.have.observable('foo')
+      expect(classStore.things).to.have.observable('numberPlusFive')
+    })
+
+    it('accepts an object', () => {
+      expect(classStore.things).to.have.observable('list')
+      expect(classStore.things).to.have.observable('number')
+      expect(classStore.things).to.have.observable('string')
+      expect(classStore.things).to.have.observable('object')
+      expect(classStore.things.object).to.have.observable('foo')
+      expect(classStore.things).to.have.observable('numberPlusFive')
+    })
+
+    it('provides stores without extraneous properties', () => {
+      const store = new Store({
+        things: {
+          list: [],
+          number: 42,
+          string: 'test',
+          object: { foo: 'bar' },
+          func: () => {},
+          anotherFunc() {},
+        }
+      })
+
+      const keys = Object.keys(store.things)
+      expect(keys).to.eql(['list', 'number', 'string', 'object', 'func', 'anotherFunc'])
+    })
+
+    it('provides stores that are serializable', () => {
+      const store = new Store({ abc: { def: 42 } })
+      const serialize = JSON.stringify(store)
+      expect(serialize).not.to.throw
+    })
+
+    it('provides the root store as a property', () => {
+      const store = new Store({ things: {} })
+      expect(store.things.$store).to.equal(store)
     })
   })
 
@@ -155,7 +218,7 @@ describe('Rivue', () => {
     })
   })
 
-  describe('instance state provider', () => {
+  describe('instance action provider', () => {
     const Vue = createLocalVue()
     Vue.use(Rivue)
 

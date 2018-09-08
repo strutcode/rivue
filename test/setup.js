@@ -15,13 +15,13 @@ Chai.Assertion.addMethod('observable', function(name) {
     if (!desc) return false
 
     return (
-      (
+      ( // Data
         (desc.get && desc.get.name.match(/(reactive|proxy)Getter/)) &&
         (desc.set && desc.set.name.match(/(reactive|proxy)Setter/))
       ) ||
-      (
+      ( // Computed
         (desc.get && desc.get.name === 'computedGetter') &&
-        (desc.set && desc.set.name === 'set')
+        (desc.set && desc.set.name.match(/(set)?/))
       )
     )
   }
