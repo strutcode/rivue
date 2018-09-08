@@ -15,6 +15,10 @@
     "/lib"
   ],
   "main": "lib/rivue.min.js",
+  "engines": {
+    "node": "8.11.4",
+    "npm": "5.6.0"
+  },
   "scripts": {
     "build": "webpack -p",
     "test": "mocha"
