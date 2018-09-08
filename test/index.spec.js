@@ -137,157 +137,159 @@ describe('Rivue', () => {
     })
   })
 
-  describe('instance state provider', () => {
-    const Vue = createLocalVue()
-    Vue.use(Rivue)
+  describe('Vue instance', () => {
+    describe('state provider', () => {
+      const Vue = createLocalVue()
+      Vue.use(Rivue)
 
-    let store, root
+      let store, root
 
-    beforeEach(() => {
-      store = new Store({
-        things: {
-          list: [],
-          object: { foo: 'bar' },
-          string: 'test',
-          number: 42,
-          get numberPlusFive() {
-            return this.number + 5
+      beforeEach(() => {
+        store = new Store({
+          things: {
+            list: [],
+            object: { foo: 'bar' },
+            string: 'test',
+            number: 42,
+            get numberPlusFive() {
+              return this.number + 5
+            },
           },
-        },
+        })
+
+        root = new Vue({ store })
       })
 
-      root = new Vue({ store })
-    })
+      it('works with a string', () => {
+        const component = new Vue({
+          parent: root,
+          state: 'things.object',
+        })
 
-    it('works with a string', () => {
-      const component = new Vue({
-        parent: root,
-        state: 'things.object',
+        expect(component.object).to.equal(store.things.object)
       })
 
-      expect(component.object).to.equal(store.things.object)
-    })
+      it('works with arrays', () => {
+        const component = new Vue({
+          parent: root,
+          state: ['things.object', 'things.object.foo', 'things.number'],
+        })
 
-    it('works with arrays', () => {
-      const component = new Vue({
-        parent: root,
-        state: ['things.object', 'things.object.foo', 'things.number'],
+        expect(component.object).to.equal(store.things.object)
+        expect(component.foo).to.equal(store.things.object.foo)
+        expect(component.number).to.equal(store.things.number)
       })
 
-      expect(component.object).to.equal(store.things.object)
-      expect(component.foo).to.equal(store.things.object.foo)
-      expect(component.number).to.equal(store.things.number)
-    })
+      it('works with objects', () => {
+        const component = new Vue({
+          parent: root,
+          state: { things: ['object', 'object.foo', 'number'] },
+        })
 
-    it('works with objects', () => {
-      const component = new Vue({
-        parent: root,
-        state: { things: ['object', 'object.foo', 'number'] },
+        expect(component.object).to.equal(store.things.object)
+        expect(component.foo).to.equal(store.things.object.foo)
+        expect(component.number).to.equal(store.things.number)
       })
 
-      expect(component.object).to.equal(store.things.object)
-      expect(component.foo).to.equal(store.things.object.foo)
-      expect(component.number).to.equal(store.things.number)
-    })
+      it('provides reactive properties', () => {
+        const component = new Vue({
+          parent: root,
+          state: { things: ['list', 'number', 'object']},
+        })
 
-    it('provides reactive properties', () => {
-      const component = new Vue({
-        parent: root,
-        state: { things: ['list', 'number', 'object']},
+        expect(component).to.have.observable('list')
+        expect(component).to.have.observable('number')
+        expect(component.object).to.have.observable('foo')
       })
 
-      expect(component).to.have.observable('list')
-      expect(component).to.have.observable('number')
-      expect(component.object).to.have.observable('foo')
-    })
+      it('synchronizes changes with the store', () => {
+        const component = new Vue({
+          parent: root,
+          state: { things: ['list', 'number', 'object'] },
+        })
 
-    it('synchronizes changes with the store', () => {
-      const component = new Vue({
-        parent: root,
-        state: { things: ['list', 'number', 'object'] },
+        component.list.push(5)
+        component.number = 2
+        component.object.foo = 'zed'
+
+        expect(store.things.list).to.eql([5])
+        expect(store.things.number).to.equal(2)
+        expect(store.things.numberPlusFive).to.equal(7)
+        expect(store.things.object.foo).to.equal('zed')
       })
-
-      component.list.push(5)
-      component.number = 2
-      component.object.foo = 'zed'
-
-      expect(store.things.list).to.eql([5])
-      expect(store.things.number).to.equal(2)
-      expect(store.things.numberPlusFive).to.equal(7)
-      expect(store.things.object.foo).to.equal('zed')
     })
-  })
 
-  describe('instance action provider', () => {
-    const Vue = createLocalVue()
-    Vue.use(Rivue)
+    describe('action provider', () => {
+      const Vue = createLocalVue()
+      Vue.use(Rivue)
 
-    let store, root
+      let store, root
 
-    beforeEach(() => {
-      store = new Store({
-        things: {
-          state: [],
-          simpleAction() {
-            this.state.push(42)
-            return this.state
+      beforeEach(() => {
+        store = new Store({
+          things: {
+            state: [],
+            simpleAction() {
+              this.state.push(42)
+              return this.state
+            },
+            actionWithParam(param) {
+              this.state = param
+            },
           },
-          actionWithParam(param) {
-            this.state = param
-          },
-        },
+        })
+
+        root = new Vue({ store })
       })
 
-      root = new Vue({ store })
-    })
+      it('works with a string', () => {
+        const component = new Vue({
+          parent: root,
+          actions: 'things.simpleAction',
+        })
 
-    it('works with a string', () => {
-      const component = new Vue({
-        parent: root,
-        actions: 'things.simpleAction',
+        expect(component.simpleAction).to.equal(store.things.simpleAction)
       })
 
-      expect(component.simpleAction).to.equal(store.things.simpleAction)
-    })
+      it('works with arrays', () => {
+        const component = new Vue({
+          parent: root,
+          actions: ['things.simpleAction', 'things.actionWithParam'],
+        })
 
-    it('works with arrays', () => {
-      const component = new Vue({
-        parent: root,
-        actions: ['things.simpleAction', 'things.actionWithParam'],
+        expect(component.simpleAction).to.equal(store.things.simpleAction)
+        expect(component.actionWithParam).to.equal(store.things.actionWithParam)
       })
 
-      expect(component.simpleAction).to.equal(store.things.simpleAction)
-      expect(component.actionWithParam).to.equal(store.things.actionWithParam)
-    })
+      it('works with objects', () => {
+        const component = new Vue({
+          parent: root,
+          actions: { things: ['simpleAction', 'actionWithParam'] },
+        })
 
-    it('works with objects', () => {
-      const component = new Vue({
-        parent: root,
-        actions: { things: ['simpleAction', 'actionWithParam'] },
+        expect(component.simpleAction).to.equal(store.things.simpleAction)
+        expect(component.actionWithParam).to.equal(store.things.actionWithParam)
       })
 
-      expect(component.simpleAction).to.equal(store.things.simpleAction)
-      expect(component.actionWithParam).to.equal(store.things.actionWithParam)
-    })
+      it('provides actions that are the same as the original', () => {
+        const component = new Vue({
+          parent: root,
+          actions: { things: 'simpleAction' },
+        })
 
-    it('provides actions that are the same as the original', () => {
-      const component = new Vue({
-        parent: root,
-        actions: { things: 'simpleAction' },
+        expect(component.simpleAction).to.equal(store.things.simpleAction)
       })
 
-      expect(component.simpleAction).to.equal(store.things.simpleAction)
-    })
+      it('actions run in the correct context', () => {
+        const component = new Vue({
+          parent: root,
+          actions: { things: 'simpleAction' },
+        })
+        const result = component.simpleAction()
 
-    it('actions run in the correct context', () => {
-      const component = new Vue({
-        parent: root,
-        actions: { things: 'simpleAction' },
+        expect(result).to.equal(store.things.state)
+        expect(store.things.state).to.eql([42])
       })
-      const result = component.simpleAction()
-
-      expect(result).to.equal(store.things.state)
-      expect(store.things.state).to.eql([42])
     })
   })
 })
