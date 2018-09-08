@@ -42,7 +42,7 @@ export class Store {
 }
 
 function lookupDescriptor(root, desc) {
-  const ids = desc.split('.')
+  const ids = desc.split(/\.|\/|\\/)
   const name = ids[ids.length - 1]
   let parent
   let value = root
