@@ -1,5 +1,5 @@
-import Store from './Store'
-import { lookupDescriptor, resolveParam } from './util'
+import Store from 'Store'
+import { lookupDescriptor, resolveParam } from 'util'
 
 function install(Vue, options) {
   Vue.mixin({

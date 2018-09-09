@@ -1,4 +1,7 @@
 const path = require('path')
+const webpack = require('webpack')
+
+const { DefinePlugin } = webpack
 
 const base = {
   mode: process.env.NODE_ENV || 'development',
@@ -22,6 +25,11 @@ const base = {
 const dev = {
   ...base,
   mode: 'development',
+  plugins: [
+    new DefinePlugin({
+      DEVELOPMENT: true,
+    }),
+  ],
   output: {
     ...base.output,
     filename: 'rivue.js',
@@ -31,6 +39,11 @@ const dev = {
 const prod = {
   ...base,
   mode: 'production',
+  plugins: [
+    new DefinePlugin({
+      DEVELOPMENT: false,
+    }),
+  ],
   output: {
     ...base.output,
     filename: 'rivue.min.js',

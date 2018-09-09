@@ -40,4 +40,5 @@ Object.assign(global, {
   stub: Sinon.stub,
   spy: Sinon.spy,
   match: Sinon.match,
+  DEVELOPMENT: true,
 })

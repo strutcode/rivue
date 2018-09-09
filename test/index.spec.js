@@ -1,7 +1,10 @@
 import { createLocalVue } from '@vue/test-utils'
-import Rivue from 'index'
+import Rivue, { Store } from 'index'
+import Vue, { util } from 'vue'
 
-const { Store, resolveParam, lookupDescriptor } = Rivue
+const nextTick = () => new Promise((resolve) => {
+  setTimeout(resolve)
+})
 
 describe('Rivue', () => {
   it('is a valid Vue plugin', () => {
@@ -134,6 +137,94 @@ describe('Rivue', () => {
     it('provides the root store as a property', () => {
       const store = new Store({ things: {} })
       expect(store.things.$store).to.equal(store)
+    })
+  })
+
+  describe('Recording', () => {
+    it('provides a JSON stream')
+
+    it('provides an event interface', () => {
+      const store = new Store()
+      store.$inspect(() => {})
+    })
+
+    it('tracks state changes over time', async () => {
+      const store = new Store({
+        things: {
+          foo: 'bar',
+          list: [],
+          nested: { test: 42 },
+        },
+      })
+
+      const callback = stub()
+      store.$inspect(callback)
+
+      store.things.foo = 'baz'
+      await nextTick()
+      expect(callback).to.have.been.calledWithMatch(
+        {
+          foo: 'bar',
+          nested: match({ test: 42 }),
+        },
+        {
+          foo: 'baz',
+          nested: match({ test: 42 }),
+        },
+      )
+
+      store.things.nested.test = 10
+      await nextTick()
+      expect(callback).to.have.been.calledWithMatch(
+        {
+          foo: 'baz',
+          nested: match({ test: 42 }),
+        },
+        {
+          foo: 'baz',
+          nested: match({ test: 10 }),
+        },
+      )
+
+      store.things.list = {}
+      await nextTick()
+      expect(callback).to.have.been.calledWithMatch(
+        { list: [] },
+        { list: {} },
+      )
+    })
+
+    it('tracks action mutations', async () => {
+      const store = new Store({
+        things: {
+          list: [],
+          add(val) {
+            this.list.push(val)
+          },
+          rem(i) {
+            this.list.splice(i, 1)
+          }
+        }
+      })
+
+      const callback = stub()
+      store.$inspect(callback)
+
+      store.things.add('Test')
+      await nextTick()
+      expect(callback).to.have.been.calledWithMatch(
+        { list: [] },
+        { list: ['Test'] },
+      )
+      callback.reset()
+
+      store.things.rem(0)
+      await nextTick()
+      expect(callback).to.have.been.calledWithMatch(
+        { list: ['Test'] },
+        { list: [] },
+      )
+      callback.reset()
     })
   })
 

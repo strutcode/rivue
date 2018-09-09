@@ -34,3 +34,29 @@ export function resolveParam(store, param) {
 
   return []
 }
+
+export function createSnapshot(obj) {
+  if (typeof obj !== 'object') return obj
+
+  const descs = Object.getOwnPropertyDescriptors(obj)
+  const result = {}
+
+  for (let name in descs) {
+    const { value, get, enumerable, configurable } = descs[name]
+
+    if (!enumerable || !configurable) continue
+    if (typeof value === 'function' || get && typeof get() === 'function') continue
+
+    if (get) result[name] = get()
+    else result[name] = value
+
+    if (Array.isArray(result[name])) {
+      result[name] = result[name].map(createSnapshot)
+    }
+    else if (typeof result[name] === 'object') {
+      result[name] = createSnapshot(result[name])
+    }
+  }
+
+  return result
+}
