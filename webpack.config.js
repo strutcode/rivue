@@ -6,6 +6,15 @@ const { DefinePlugin } = webpack
 const base = {
   mode: process.env.NODE_ENV || 'development',
   entry: './src/index.js',
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: 'babel-loader',
+      },
+    ],
+  },
   output: {
     path: path.resolve(__dirname, 'lib'),
     library: 'Rivue',
