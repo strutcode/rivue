@@ -1,6 +1,6 @@
 {
   "name": "rivue",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A clean, no frills Flux alternative for Vue.js 2.x.",
   "repository": "github:strutcode/rivue",
   "homepage": "https://github.com/strutcode/rivue#readme",
