@@ -19,6 +19,7 @@ const base = {
     path: path.resolve(__dirname, 'lib'),
     library: 'Rivue',
     libraryTarget: 'umd',
+    globalObject: 'typeof self !== \'undefined\' ? self : this',
   },
   externals: {
     vue: {
