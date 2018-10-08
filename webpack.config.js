@@ -19,7 +19,7 @@ const base = {
     path: path.resolve(__dirname, 'lib'),
     library: 'Rivue',
     libraryTarget: 'umd',
-    globalObject: 'typeof self !== \'undefined\' ? self : this',
+    globalObject: 'this',
   },
   externals: {
     vue: {
@@ -60,4 +60,13 @@ const prod = {
   }
 }
 
-module.exports = [dev, prod]
+const common = {
+  ...dev,
+  output: {
+    ...base.output,
+    libraryTarget: 'commonjs2',
+    filename: 'rivue.common.js',
+  }
+}
+
+module.exports = [dev, prod, common]
