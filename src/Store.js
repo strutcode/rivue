@@ -1,4 +1,4 @@
-import Vue, { util } from 'vue'
+import Vue from 'vue'
 
 import { createSnapshot } from 'util'
 
@@ -37,13 +37,13 @@ export default class Store {
       props.forEach(key => {
         if (typeof instance[key] === 'function') {
           const original = instance[key]
-          util.defineReactive(instance, key, (...args) => {
+          Vue.util.defineReactive(instance, key, (...args) => {
             this._context = [key]
             return original.apply(instance, args)
           })
         }
 
-        util.defineReactive(instance, key)
+        Vue.util.defineReactive(instance, key)
       })
 
       Object.defineProperty(instance, '$store', {

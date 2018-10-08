@@ -20,7 +20,7 @@
     "npm": "5.6.0"
   },
   "scripts": {
-    "build": "webpack -p",
+    "build": "webpack",
     "test": "mocha"
   },
   "author": "Tristan Shelton",
