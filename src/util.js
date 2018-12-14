@@ -1,7 +1,7 @@
-export function lookupDescriptor(root, desc) {
+export function lookupDescriptor(root, desc, rootName = '<root>') {
   const ids = desc.split(/\.|\/|\\/)
   const name = ids[ids.length - 1]
-  let parent
+  let parent, parentName
   let value = root
 
   for (let i = 0; i < ids.length; i++) {
@@ -10,26 +10,27 @@ export function lookupDescriptor(root, desc) {
     }
 
     parent = value
+    parentName = ids[i - 1] || rootName
     value = value[ids[i]]
   }
 
-  return { parent, name, value }
+  return { parent, parentName, name, value }
 }
 
-export function resolveParam(store, param) {
+export function resolveParam(store, param, name) {
   if (Array.isArray(param)) {
-    return param.map(lookupDescriptor.bind(null, store))
+    return param.map(p => lookupDescriptor(store, p, name))
   }
   if (typeof param === 'object') {
     const flatLookup = (acc, [key, value]) => {
-      const resolved = resolveParam(store[key], value)
+      const resolved = resolveParam(store[key], value, key)
       return acc.concat(resolved)
     }
 
     return Object.entries(param).reduce(flatLookup, [])
   }
   if (typeof param === 'string') {
-    return [lookupDescriptor(store, param)]
+    return [lookupDescriptor(store, param, name)]
   }
 
   return []
