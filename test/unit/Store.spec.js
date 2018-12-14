@@ -44,7 +44,7 @@ describe('Store', () => {
     }
   }
 
-  let store
+  let store, objectThings
 
   const createComponent = (options) => {
     const Vue = createLocalVue()
@@ -57,27 +57,35 @@ describe('Store', () => {
   }
 
   beforeEach(() => {
+    objectThings = {
+      list: [],
+      number: 42,
+      string: 'test',
+      object: { foo: 'bar' },
+      get numberPlusFive() {
+        return this.number + 5
+      },
+      listAction() {
+        this.list.push({ abc: 123 })
+        this.number = 5
+        return this
+      },
+    }
+
     store = new Store({
       Things,
       OldThings,
-      objectThings: {
-        list: [],
-        number: 42,
-        string: 'test',
-        object: { foo: 'bar' },
-        get numberPlusFive() {
-          return this.number + 5
-        },
-        listAction() {
-          this.list.push({ abc: 123 })
-          this.number = 5
-          return this
-        },
-      },
+      objectThings,
     })
   })
 
   it('Accepts different kinds of definitions', () => {
+    const createEmpty = () => new Store()
+    expect(createEmpty).not.to.throw()
+
+    const createInvalid = () => new Store({ foo: 'bar' })
+    expect(createInvalid).to.throw()
+
     // Check against extraneous properties
     expect(Object.keys(store.things)).to.eql(['list', 'number', 'string', 'object', 'constructor', 'numberPlusFive', 'listAction'])
     expect(Object.keys(store.oldthings)).to.eql(['list', 'number', 'string', 'object', 'numberPlusFive', 'listAction', 'constructor'])
@@ -92,6 +100,9 @@ describe('Store', () => {
       expect(s.object).to.have.observable('foo')
       expect(s).to.have.observable('numberPlusFive')
     })
+
+    expect(objectThings).not.to.have.observable('list')
+    expect(objectThings.object).not.to.have.observable('foo')
   })
 
   it('Provides reactive state & actions', async () => {

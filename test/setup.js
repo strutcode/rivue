@@ -6,10 +6,7 @@ import 'chai/register-expect'
 Chai.use(SinonChai)
 
 Chai.Assertion.addMethod('observable', function(name) {
-  const observable = new Chai.Assertion(this._obj)
   const isObservable = (obj, id) => {
-    if (typeof obj[id] === 'object') return obj[id].__ob__
-
     const desc = Object.getOwnPropertyDescriptor(obj, id)
 
     if (!desc) return false
@@ -28,7 +25,7 @@ Chai.Assertion.addMethod('observable', function(name) {
 
   new Chai.Assertion(this._obj).to.be.an('object')
 
-  observable.assert(
+  this.assert(
     isObservable(this._obj, name),
     `expected object to have observable '${name}'`,
     `expected object not to have observable '${name}'`,

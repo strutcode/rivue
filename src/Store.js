@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import cloneDeep from 'lodash/cloneDeep'
 
 import { createSnapshot } from 'util'
 
@@ -27,7 +28,7 @@ export default class Store {
         ]
       }
       else if (typeof Constructor === 'object') {
-        instance = Constructor
+        instance = cloneDeep(Constructor)
         props = Object.getOwnPropertyNames(instance)
       }
       else {
@@ -42,8 +43,9 @@ export default class Store {
             return original.apply(instance, args)
           })
         }
-
-        Vue.util.defineReactive(instance, key)
+        else {
+          Vue.util.defineReactive(instance, key)
+        }
       })
 
       Object.defineProperty(instance, '$store', {
