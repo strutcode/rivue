@@ -40,5 +40,9 @@ Object.assign(global, {
   stub: Sinon.stub,
   spy: Sinon.spy,
   match: Sinon.match,
+  Vue: { use: Sinon.stub() },
+  nextTick:  () => new Promise((resolve) => {
+    setTimeout(resolve)
+  }),
   DEVELOPMENT: true,
 })
