@@ -1,21 +1,15 @@
 import Vue from 'vue'
-import cloneDeep from 'lodash/cloneDeep'
 
-import { createSnapshot } from 'util'
-
-const hidden = (t, v, d) => {
-  d.enumerable = false
-  return d
-}
+import History from 'History'
+import { clone, createSnapshot, iterateObject, hidden } from 'util'
 
 export default class Store {
-  @hidden _stores = []
-  @hidden _context = []
+  @hidden _subscribers = []
 
   constructor(stores) {
     if (!stores) return
 
-    Object.entries(stores).forEach(([name, Constructor]) => {
+    iterateObject(stores, (name, Constructor) => {
       const storeName = name.toLowerCase()
 
       let instance, props
@@ -28,7 +22,7 @@ export default class Store {
         ]
       }
       else if (typeof Constructor === 'object') {
-        instance = cloneDeep(Constructor)
+        instance = clone(Constructor)
         props = Object.getOwnPropertyNames(instance)
       }
       else {
@@ -38,9 +32,21 @@ export default class Store {
       props.forEach(key => {
         if (typeof instance[key] === 'function') {
           const original = instance[key]
+
           Vue.util.defineReactive(instance, key, (...args) => {
-            this._context = [key]
-            return original.apply(instance, args)
+            const oldState = createSnapshot(instance)
+            const result = original.apply(instance, args)
+            const newState = createSnapshot(instance)
+
+            const change = {
+              store: storeName,
+              action: key,
+              oldState,
+              newState,
+            }
+            this._subscribers.forEach(f => f(change))
+
+            return result
           })
         }
         else {
@@ -55,36 +61,35 @@ export default class Store {
       })
 
       this[storeName] = instance
-      this._stores.push(storeName)
     })
   }
 
-  $inspect(handler) {
-    const opts = {
-      data: this._stores.reduce(
-        (acc, name) => {
-          acc[name] = this[name]
-          return acc
-        },
-        {},
-      ),
-      watch: this._stores.reduce(
-        (watchers, name) => {
-          let before = createSnapshot(this[name])
-          watchers[name] = {
-            handler: function(oldVal, newVal) {
-              const after = createSnapshot(newVal)
-              handler(before, after, this._context)
-              before = after
-            },
-            deep: true,
-          }
-          return watchers
-        },
-        {},
-      )
+  @hidden $history = new History(this)
+
+  $subscribe(callback) {
+    this._subscribers.push(callback)
+  }
+
+  $serialize() {
+    return createSnapshot(this)
+  }
+
+  $replace(store, newState) {
+    if (!this[store]) {
+      throw new Error(`Invlid store '${store}'`)
     }
 
-    const watcher = new Vue(opts)
+    iterateObject(newState, (key, value) => {
+      if (typeof value === 'object') {
+        this[store][key] = clone(value)
+      }
+      else {
+        this[store][key] = value
+      }
+    })
+  }
+
+  $replaceAll(newState) {
+    iterateObject(newState, (key, value) => this.$replace(key, value))
   }
 }

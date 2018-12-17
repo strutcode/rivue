@@ -1,5 +1,7 @@
-export function lookupDescriptor(root, desc, rootName = '<root>') {
-  const ids = desc.split(/\.|\/|\\/)
+import cloneDeep from 'lodash/cloneDeep'
+
+export function lookupDescriptor(root, desc, sep = '.') {
+  const ids = desc.split(sep)
   const name = ids[ids.length - 1]
   let parent, parentName
   let value = root
@@ -10,7 +12,7 @@ export function lookupDescriptor(root, desc, rootName = '<root>') {
     }
 
     parent = value
-    parentName = ids[i - 1] || rootName
+    parentName = ids[i - 1]
     value = value[ids[i]]
   }
 
@@ -43,12 +45,16 @@ export function createSnapshot(obj) {
   const result = {}
 
   for (let name in descs) {
-    const { value, get, enumerable, configurable } = descs[name]
+    const { value, get, enumerable } = descs[name]
 
-    if (!enumerable || !configurable) continue
-    if (typeof value === 'function' || get && typeof get() === 'function') continue
+    if (!enumerable) continue
+    if (typeof value === 'function') continue
 
-    if (get) result[name] = get()
+    if (get) {
+      const value = get.call(obj)
+      if (typeof value === 'function') continue
+      result[name] = value
+    }
     else result[name] = value
 
     if (Array.isArray(result[name])) {
@@ -60,4 +66,19 @@ export function createSnapshot(obj) {
   }
 
   return result
+}
+
+export function clone(obj) {
+  return cloneDeep(obj)
+}
+
+export function iterateObject(obj, callback) {
+  const props = Object.getOwnPropertyNames(obj)
+
+  props.forEach((prop) => callback(prop, obj[prop]))
+}
+
+export function hidden(t, v, d) {
+  d.enumerable = false
+  return d
 }
