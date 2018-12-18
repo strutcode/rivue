@@ -1,5 +1,3 @@
-import cloneDeep from 'lodash/cloneDeep'
-
 export function lookupDescriptor(root, desc, rootName) {
   const ids = desc.split(/\.|\\|\//)
   const name = ids[ids.length - 1]
@@ -69,7 +67,20 @@ export function createSnapshot(obj) {
 }
 
 export function clone(obj) {
-  return cloneDeep(obj)
+  if (obj == null || typeof obj !== 'object') return obj
+
+  const result = Array.isArray(obj) ? [] : {}
+
+  iterateObject(obj, (key, value) => {
+    if (typeof value === 'object') {
+      result[key] = clone(value)
+    }
+    else {
+      result[key] = value
+    }
+  })
+
+  return result
 }
 
 export function iterateObject(obj, callback) {

@@ -196,28 +196,4 @@ describe('Utilities', () => {
       expect(b.value.foo).to.equal(a.value.foo)
     })
   })
-  
-  // describe('diff', () => {
-  //   const a = {
-  //     string: 'foo',
-  //     array: [],
-  //     object: {
-  //       string: 'foo',
-  //       array: [42],
-  //     },
-  //   }
-
-  //   const a = {
-  //     string: 'bar',
-  //     array: [1, 2, 3],
-  //     object: {
-  //       string: '123',
-  //       array: [],
-  //     },
-  //   }
-
-  //   const result = diff(a, b)
-
-  //   expect(result).to.eql({})
-  // })
 })
