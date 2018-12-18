@@ -60,6 +60,9 @@ describe('History', () => {
     expect(hook.on).to.have.been.calledWith('vuex:travel-to-state', match.func)
     expect(hook.emit).to.have.been.calledWith('vuex:init', match.object)
     store.things.add()
-    expect(hook.emit).to.have.been.calledWith('vuex:mutation', 'add', match.object)
+    expect(hook.emit).to.have.been.calledWith('vuex:mutation', {
+      type: 'things/add',
+      payload: undefined,
+    })
   })
 })

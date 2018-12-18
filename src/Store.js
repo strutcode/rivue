@@ -62,9 +62,11 @@ export default class Store {
 
       this[storeName] = instance
     })
+
+    this.$history = new History(this)
   }
 
-  @hidden $history = new History(this)
+  @hidden $history
 
   $subscribe(callback) {
     this._subscribers.push(callback)

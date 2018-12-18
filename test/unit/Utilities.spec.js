@@ -7,7 +7,7 @@ describe('Utilities', () => {
 
       expect(lookupDescriptor(obj, 'abc')).to.eql({
         parent: obj,
-        parentName: '<root>',
+        parentName: undefined,
         name: 'abc',
         value: 'def',
       })
@@ -74,7 +74,7 @@ describe('Utilities', () => {
     it('Can map a string', () => {
       expect(resolveParam(obj, 'value')).to.eql([{
         parent: obj,
-        parentName: '<root>',
+        parentName: undefined,
         name: 'value',
         value: 'abc',
       }])
@@ -85,7 +85,7 @@ describe('Utilities', () => {
         .to.eql([
           {
             parent: obj,
-            parentName: '<root>',
+            parentName: undefined,
             name: 'value',
             value: 'abc',
           },

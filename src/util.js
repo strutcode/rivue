@@ -1,7 +1,7 @@
 import cloneDeep from 'lodash/cloneDeep'
 
-export function lookupDescriptor(root, desc, sep = '.') {
-  const ids = desc.split(sep)
+export function lookupDescriptor(root, desc, rootName) {
+  const ids = desc.split(/\.|\\|\//)
   const name = ids[ids.length - 1]
   let parent, parentName
   let value = root
@@ -12,7 +12,7 @@ export function lookupDescriptor(root, desc, sep = '.') {
     }
 
     parent = value
-    parentName = ids[i - 1]
+    parentName = ids[i - 1] || rootName
     value = value[ids[i]]
   }
 

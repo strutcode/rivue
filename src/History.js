@@ -6,10 +6,13 @@ export default class History {
 
   constructor(store) {
     const devtool = typeof window !== 'undefined' && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
+    const fakeStore = {}
+
     this._store = store
 
     if (devtool) {
-      devtool.emit('vuex:init', store.$serialize())
+      fakeStore.state = store.$serialize()
+      devtool.emit('vuex:init', fakeStore)
       devtool.on('vuex:travel-to-state', (targetState) => {
         store.$replaceAll(targetState)
       })
@@ -20,7 +23,11 @@ export default class History {
       this._current++
 
       if (devtool) {
-        devtool.emit('vuex:mutation', change.action, store.$serialize())
+        fakeStore.state = store.$serialize()
+        devtool.emit('vuex:mutation', {
+          type: `${change.store}/${change.action}`,
+          payload: undefined,
+        })
       }
     })
   }
