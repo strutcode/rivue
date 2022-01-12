@@ -3,6 +3,7 @@
 ![Travis (.org)](https://img.shields.io/travis/strutcode/rivue.svg?style=flat-square)
 ![npm dependencies](https://img.shields.io/badge/dependencies-0-green.svg?style=flat-square)
 [![GitHub license](https://img.shields.io/github/license/strutcode/rivue.svg?style=flat-square)](https://github.com/strutcode/rivue/blob/master/LICENSE)
+[![Rate on Openbase](https://badges.openbase.com/js/rating/rivue.svg)](https://openbase.com/js/rivue?utm_source=embedded&utm_medium=badge&utm_campaign=rate-badge)
 
 # Rivue
 A clean, no frills Flux alternative for Vue.js 2.x.
